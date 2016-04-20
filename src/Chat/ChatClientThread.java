@@ -25,6 +25,9 @@ public class ChatClientThread extends Thread {
     private ChatClient _client;
     private JTextArea _outputArea;
     private Socket _socket = null;
+    
+    //Server related fields
+    private ServerSocket _serverSocket = null;
 
     public ChatClientThread(ChatClient client) {
 
@@ -46,7 +49,7 @@ public class ChatClientThread extends Thread {
 
             while ((msg = in.readLine()) != null) {
 
-                consumeMessage(msg + " \n");
+                consumeMessage(msg);
             }
 
             _socket.close();
@@ -62,7 +65,7 @@ public class ChatClientThread extends Thread {
 
 
         if (msg != null) {
-            _outputArea.append(msg);
+            _outputArea.append(msg + "\n");
         }
 
     }
