@@ -13,6 +13,8 @@ import java.io.*;
 // Swing
 import javax.swing.JTextArea;
 
+import Chat.Utils.HashType;
+
 //  Crypto
 import java.security.*;
 import java.security.spec.*;
@@ -56,7 +58,43 @@ public class AuthServerThread extends Thread {
                 Socket socket = _serverSocket.accept();
                 //
                 //  Got the connection, now do what is required
-                //  
+                //
+                
+                PrintWriter out = new PrintWriter(socket.getOutputStream(), true);
+
+    	        BufferedReader in = new BufferedReader(new InputStreamReader(
+    	                socket.getInputStream()));
+                
+    	        _outputArea.append( "Got socket");
+    	        
+    	        String msg;
+    	        boolean passwordCorrect = false;
+
+				msg = in.readLine();
+				
+				msg = msg.trim();
+                String id = msg.split( " ")[0];
+                String hash = msg.split( " ")[1];
+                
+                _outputArea.append( "Request from " + id + " received\n");
+                
+                //Check if password is correct
+                if( id.equals( Constants.USERNAME) && Utils.hash( Constants.KA, HashType.MD5).equals(hash))
+                	passwordCorrect = true;
+                
+                if( passwordCorrect) {
+                	
+                	
+                	out.println( "session-key TGT\n");
+                	System.out.println( "Passwrod correct");
+                }
+                
+                else {
+                	
+                	System.out.println( "Password is not correct");
+                	socket.close();
+                }
+                
             }
         } catch (Exception e) {
             System.out.println("AS thread error: " + e.getMessage());

@@ -19,7 +19,7 @@ public class Utils {
 	}
 	
 	public static void main(String[] args) {
-		
+		/*
 	    Scanner sn = new Scanner(System.in);
 	    System.out.print("Please enter data for which SHA256 is required:");
 	    String data = sn.nextLine();		
@@ -36,9 +36,9 @@ public class Utils {
 	    System.out.println("decrypted string: "+ decrypted);
         System.out.println(decrypt_aes(key, initVector,
                 encrypt_aes(key, initVector, "Hello World")));
+		*/
 	}
 	
-	//TODO: enum hashtype
 	public static String hash(String str, HashType type) {
 		
 	    String result = null;

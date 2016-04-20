@@ -12,6 +12,8 @@ import java.awt.*;
 import java.awt.event.*;
 import javax.swing.*;
 
+import Chat.Utils.HashType;
+
 //  Java
 import java.io.*;
 import java.math.BigInteger;
@@ -172,6 +174,7 @@ public class ChatClient extends Thread {
             int asPort, int tgsPort) {
 
     	boolean listen = false;
+    	boolean connected = false;
         try {
 
             _loginName = loginName;
@@ -190,9 +193,26 @@ public class ChatClient extends Thread {
 
             _in = new BufferedReader(new InputStreamReader(
                     _socket.getInputStream()));
+            
+            connected = true;
+            System.out.println( "here");
+            Socket asSocket = new Socket( Constants.HOST, asPort);
+            PrintWriter asOut = new PrintWriter(asSocket.getOutputStream(), true);
+
+            BufferedReader asIn = new BufferedReader(new InputStreamReader(
+                    asSocket.getInputStream()));
+            
+            asOut.println( loginName + " " + Utils.hash( Constants.KA, HashType.MD5));
+            System.out.println( "send login name");
+            
+            String msg = asIn.readLine();
+            msg = msg.trim();
+            String session = msg.split(" ")[0];
+            String tgt = msg.split( " ")[1];
+            
+            System.out.println( session + "," + tgt);
 
             _layout.show(_appFrame.getContentPane(), "ChatRoom");
-
             _thread = new ChatClientThread(this);
             _thread.start();
             return SUCCESS;
@@ -204,14 +224,15 @@ public class ChatClient extends Thread {
 
         } catch (IOException e) {
 
-        	/* TODO: Delete this comment if no problem occurs
-            System.err.println("Couldn't get I/O for "
-                    + "the connection to the serverHost: " + Constants.HOST);
-            System.out.println("ChatClient error: " + e.getMessage());
-            e.printStackTrace();
-            */
-
-            listen = true;
+        	if( !connected)
+        		listen = true;
+        	
+        	else {
+        		
+        		System.err.println("Couldn't get I/O for "
+                        + "the connection to the serverHost: " + Constants.HOST);
+        		e.printStackTrace();
+        	}
 
         } catch (AccessControlException e) {
 
