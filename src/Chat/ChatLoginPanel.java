@@ -16,10 +16,10 @@ public class ChatLoginPanel extends JPanel {
 
     JTextField _loginNameField;
     JPasswordField _passwordField;
-    JTextField _serverHostField;
-    JTextField _serverPortField;
-    JTextField _caHostField;
-    JTextField _caPortField;
+    JTextField _portToListenField;
+    JTextField _portToConnectField;
+    JTextField _asPortField;
+    JTextField _tgsPortField;
     JTextField _keyStoreNameField;
     JPasswordField _keyStorePasswordField;
     JLabel _errorLabel;
@@ -44,16 +44,16 @@ public class ChatLoginPanel extends JPanel {
 
         setLayout(gridBag);
 
-        addLabel(gridBag, "Welcome to Chat", SwingConstants.CENTER,
+        addLabel(gridBag, "Welcome to High Security Chat", SwingConstants.CENTER,
                 1, 0, 2, 1);
         addLabel(gridBag, "Username: ", SwingConstants.LEFT, 1, 1, 1, 1);
         addLabel(gridBag, "Password: ", SwingConstants.LEFT, 1, 2, 1, 1);
         addLabel(gridBag, "KeyStore File Name: ", SwingConstants.LEFT, 1, 3, 1, 1);
         addLabel(gridBag, "KeyStore Password: ", SwingConstants.LEFT, 1, 4, 1, 1);
-        addLabel(gridBag, "Server Host Name: ", SwingConstants.LEFT, 1, 5, 1, 1);
-        addLabel(gridBag, "Server Port: ", SwingConstants.LEFT, 1, 6, 1, 1);
-        addLabel(gridBag, "CA Host Name: ", SwingConstants.LEFT, 1, 7, 1, 1);
-        addLabel(gridBag, "CA Port: ", SwingConstants.LEFT, 1, 8, 1, 1);
+        addLabel(gridBag, "Port to Listen: ", SwingConstants.LEFT, 1, 5, 1, 1);
+        addLabel(gridBag, "Port to Connect: ", SwingConstants.LEFT, 1, 6, 1, 1);
+        addLabel(gridBag, "AS Port: ", SwingConstants.LEFT, 1, 7, 1, 1);
+        addLabel(gridBag, "TGS Port: ", SwingConstants.LEFT, 1, 8, 1, 1);
 
         _loginNameField = new JTextField();
         addField(gridBag, _loginNameField, 2, 1, 1, 1);
@@ -67,29 +67,29 @@ public class ChatLoginPanel extends JPanel {
         _keyStorePasswordField.setEchoChar('*');
         addField(gridBag, _keyStorePasswordField, 2, 4, 1, 1);
 
-        _serverHostField = new JTextField();
-        addField(gridBag, _serverHostField, 2, 5, 1, 1);
-        _serverPortField = new JTextField();
-        addField(gridBag, _serverPortField, 2, 6, 1, 1);
+        _portToListenField = new JTextField();
+        addField(gridBag, _portToListenField, 2, 5, 1, 1);
+        _portToConnectField = new JTextField();
+        addField(gridBag, _portToConnectField, 2, 6, 1, 1);
 
-        _caHostField = new JTextField();
-        addField(gridBag, _caHostField, 2, 7, 1, 1);
-        _caPortField = new JTextField();
-        addField(gridBag, _caPortField, 2, 8, 1, 1);
+        _asPortField = new JTextField();
+        addField(gridBag, _asPortField, 2, 7, 1, 1);
+        _tgsPortField = new JTextField();
+        addField(gridBag, _tgsPortField, 2, 8, 1, 1);
 
         _errorLabel = addLabel(gridBag, " ", SwingConstants.CENTER,
                 1, 9, 2, 1);
 
         // just for testing purpose
 
-        _loginNameField.setText("cs470");
+        _loginNameField.setText("Client");
         _passwordField.setText("123456");
         _keyStoreNameField.setText("client1");
         _keyStorePasswordField.setText("123456");
-        _caHostField.setText("localhost");
-        _caPortField.setText("6666");
-        _serverHostField.setText("localhost");
-        _serverPortField.setText("7777");
+        _asPortField.setText("" + Constants.AS_PORT);
+        _tgsPortField.setText("" + Constants.TGS_PORT);
+        _portToListenField.setText("" + Constants.CLIENT1_PORT);
+        _portToConnectField.setText("" + Constants.CLIENT2_PORT);
 
         _errorLabel.setForeground(Color.red);
 
@@ -142,8 +142,9 @@ public class ChatLoginPanel extends JPanel {
 
     private void connect() {
 
-        int serverPort;
-        int caPort;
+        int portToListen, portToConnect;
+        int asPort = Constants.AS_PORT;
+        int tgsPort = Constants.TGS_PORT;
 
         String loginName = _loginNameField.getText();
         char[] password = _passwordField.getPassword();
@@ -151,17 +152,16 @@ public class ChatLoginPanel extends JPanel {
         String keyStoreName = _keyStoreNameField.getText();
         char[] keyStorePassword = _keyStorePasswordField.getPassword();
 
-        String serverHost = _serverHostField.getText();
-        String caHost = _caHostField.getText();
+        String serverHost = Constants.HOST;
 
         if (loginName.equals("")
                 || password.length == 0
                 || keyStoreName.equals("")
                 || keyStorePassword.length == 0
-                || serverHost.equals("")
-                || _serverPortField.getText().equals("")
-                || caHost.equals("")
-                || _caPortField.getText().equals("")) {
+                || _portToListenField.getText().equals("")
+                || _portToConnectField.getText().equals("")
+                || _asPortField.getText().equals("")
+                || _tgsPortField.getText().equals("")) {
 
             _errorLabel.setText("Missing required field.");
 
@@ -175,8 +175,10 @@ public class ChatLoginPanel extends JPanel {
 
         try {
 
-            serverPort = Integer.parseInt(_serverPortField.getText());
-            caPort = Integer.parseInt(_caPortField.getText());
+            portToListen = Integer.parseInt(_portToListenField.getText());
+            portToConnect = Integer.parseInt(_portToConnectField.getText());
+            asPort = Integer.parseInt(_asPortField.getText());
+            tgsPort = Integer.parseInt(_tgsPortField.getText());
 
         } catch (NumberFormatException nfExp) {
 
@@ -191,10 +193,10 @@ public class ChatLoginPanel extends JPanel {
                 password,
                 keyStoreName,
                 keyStorePassword,
-                caHost,
-                caPort,
-                serverHost,
-                serverPort)) {
+                portToListen,
+                portToConnect,
+                asPort,
+                tgsPort)) {
 
             case ChatClient.SUCCESS:
                 //  Nothing happens, this panel is now hidden

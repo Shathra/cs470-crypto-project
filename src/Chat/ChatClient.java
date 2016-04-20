@@ -33,7 +33,7 @@ import javax.crypto.spec.*;
 import javax.crypto.interfaces.*;
 import javax.security.auth.x500.*;
 
-public class ChatClient {
+public class ChatClient extends Thread {
 
     public static final int SUCCESS = 0;
     public static final int CONNECTION_REFUSED = 1;
@@ -55,12 +55,15 @@ public class ChatClient {
     KeyStore caKeyStore;
 //    KeyManagerFactory keyManagerFactory;
 //    TrustManagerFactory trustManagerFactory;
+	private ServerSocket _serverSocket;
+	private JDialog waitDialog;
   
     //  ChatClient Constructor
     //
     //  empty, as you can see.
     public ChatClient() {
 
+    	super("ChatClientListenThread");
         _loginName = null;
         _server = null;
 
@@ -75,10 +78,34 @@ public class ChatClient {
 
     }
 
-    public void run() {
+    public void show() {
         _appFrame.pack();
         _appFrame.setVisible(true);
 
+    }
+    
+    public void run() {
+    	
+    	System.out.println( "Listening started");
+    	try {
+			_socket = _serverSocket.accept();
+			System.out.println( "Listening ends");
+			waitDialog.setVisible(false);
+			waitDialog.dispatchEvent(new WindowEvent(
+			waitDialog, WindowEvent.WINDOW_CLOSING));
+			_out = new PrintWriter(_socket.getOutputStream(), true);
+
+	        _in = new BufferedReader(new InputStreamReader(
+	                _socket.getInputStream()));
+
+	        _layout.show(_appFrame.getContentPane(), "ChatRoom");
+
+	        _thread = new ChatClientThread(this);
+	        _thread.start();
+		} catch (IOException e) {
+			System.out.println("ChatClient err: " + e.getMessage());
+            e.printStackTrace();
+		}
     }
 
     //  main
@@ -88,7 +115,7 @@ public class ChatClient {
         
         ChatClient app = new ChatClient();
 
-        app.run();
+        app.show();
     }
 
     //  initComponents
@@ -96,7 +123,7 @@ public class ChatClient {
     //  Component initialization
     private void initComponents() throws Exception {
 
-        _appFrame = new JFrame("CS255 Chat");
+        _appFrame = new JFrame("WutsApp");
         _layout = new CardLayout();
         _appFrame.getContentPane().setLayout(_layout);
         _loginPanel = new ChatLoginPanel(this);
@@ -141,9 +168,10 @@ public class ChatClient {
     //
     public int connect(String loginName, char[] password,
             String keyStoreName, char[] keyStorePassword,
-            String caHost, int caPort,
-            String serverHost, int serverPort) {
+            int portToListen, int portToConnect,
+            int asPort, int tgsPort) {
 
+    	boolean listen = false;
         try {
 
             _loginName = loginName;
@@ -157,7 +185,7 @@ public class ChatClient {
             //  Use certificate to establish secure connection with server
             //
 
-            _socket = new Socket(serverHost, serverPort);
+            _socket = new Socket(Constants.HOST, portToConnect);
             _out = new PrintWriter(_socket.getOutputStream(), true);
 
             _in = new BufferedReader(new InputStreamReader(
@@ -171,17 +199,19 @@ public class ChatClient {
 
         } catch (UnknownHostException e) {
 
-            System.err.println("Don't know about the serverHost: " + serverHost);
+            System.err.println("Don't know about the serverHost: " + Constants.HOST);
             System.exit(1);
 
         } catch (IOException e) {
 
+        	/* TODO: Delete this comment if no problem occurs
             System.err.println("Couldn't get I/O for "
-                    + "the connection to the serverHost: " + serverHost);
+                    + "the connection to the serverHost: " + Constants.HOST);
             System.out.println("ChatClient error: " + e.getMessage());
             e.printStackTrace();
+            */
 
-            System.exit(1);
+            listen = true;
 
         } catch (AccessControlException e) {
 
@@ -191,6 +221,29 @@ public class ChatClient {
 
             System.out.println("ChatClient err: " + e.getMessage());
             e.printStackTrace();
+        }
+        
+        if( listen) {
+        	
+        	try {
+        		
+				_serverSocket = new ServerSocket(portToListen);
+	            this.start();
+	            waitDialog = new JDialog((JFrame) SwingUtilities.getWindowAncestor(_loginPanel), "Please Wait", Dialog.ModalityType.DOCUMENT_MODAL);
+	            waitDialog.setLayout( new GridBagLayout());
+	            waitDialog.setSize(300,100);
+	            //JPanel panelInside = new JPanel( new BorderLayout());
+	            waitDialog.add( new JLabel( "...waiting a participant..."));
+	            //d.add( panelInside);
+	            waitDialog.setLocationRelativeTo((JFrame) SwingUtilities.getWindowAncestor(_loginPanel));
+	            waitDialog.setVisible(true);
+	            
+	            return SUCCESS;
+			} catch (IOException e) {
+				
+				System.err.println("Could not listen on port: " + portToListen);
+	            System.exit(-1);
+			}
         }
 
         return ERROR;
@@ -207,6 +260,7 @@ public class ChatClient {
             msg = _loginName + "> " + msg;
 
             _out.println(msg);
+            getOutputArea().append(msg + "\n");
 
         } catch (Exception e) {
 
