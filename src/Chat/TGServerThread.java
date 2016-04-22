@@ -28,6 +28,17 @@ public class TGServerThread extends Thread {
     private int _portNum;
     private String _hostName;
     private JTextArea _outputArea;
+    
+    private String tgsKeyStoreFileName;
+    private String tgsKeyStorePassword;
+    
+    private static final String kaAlias = "clientA";
+    private static final String kbAlias = "clientB";
+    private static final String kkdcAlias = "KDC";
+    private static final String kaPassword = "passwordA";
+    private static final String kbPassword = "passwordB";
+    private static final String kkdcPassword = "passwordKDC";
+    
 
     public TGServerThread(TGServer tgs) {
 
@@ -63,9 +74,9 @@ public class TGServerThread extends Thread {
                 BufferedReader asIn = new BufferedReader(new InputStreamReader(
                         asSocket.getInputStream()));
                 
-                String kKDC = Utils.getKey(Constants.keyStoreFileName, Constants.keyStorePassword, "KDC", Constants.KDCpassword);
-                String kAB = Utils.getKey(Constants.keyStoreFileName, Constants.keyStorePassword, "AB", Constants.ABpassword);
-                String kB = Utils.getKey(Constants.keyStoreFileName, Constants.keyStorePassword, "B", Constants.Bpassword);
+                String kKDC = Utils.getKey(tgsKeyStoreFileName, tgsKeyStorePassword, kkdcAlias, kkdcPassword);
+                String kAB = Utils.getKey(tgsKeyStoreFileName, tgsKeyStorePassword, "AB", Constants.ABpassword);
+                String kB = Utils.getKey(tgsKeyStoreFileName, tgsKeyStorePassword, kbAlias, kbPassword);
                 
                 String [] input = asIn.readLine().split(" ");
                 String idA_tocheck = input[0];
