@@ -115,7 +115,7 @@ public class Utils {
     	try {
     		
     		URL keyStoreUrl = keyStoreUri.toURL();
-        	keyStore = KeyStore.getInstance( "JKS");
+        	keyStore = KeyStore.getInstance( "JCEKS");
     		is = keyStoreUrl.openStream();
     		keyStore.load(is, null == password ? null : password.toCharArray());
     		System.out.println("Loaded key store");

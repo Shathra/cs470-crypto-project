@@ -179,7 +179,8 @@ public class ChatClient extends Thread {
 
             _loginName = loginName;
 
-
+            Key kA = Utils.getKey(keyStoreName, String.valueOf( keyStorePassword), loginName, String.valueOf(password));
+            System.out.println( kA.getEncoded());
             //
             //  Read the client keystore
             //         (for its private/public keys)
