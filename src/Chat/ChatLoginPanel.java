@@ -82,10 +82,10 @@ public class ChatLoginPanel extends JPanel {
 
         // just for testing purpose
 
-        _loginNameField.setText("Client");
-        _passwordField.setText("123456");
-        _keyStoreNameField.setText("client1");
-        _keyStorePasswordField.setText("123456");
+        _loginNameField.setText("clientA");
+        _passwordField.setText("passwordA");
+        _keyStoreNameField.setText("storeA.jceks");
+        _keyStorePasswordField.setText("passwordA");
         _asPortField.setText("" + Constants.AS_PORT);
         _tgsPortField.setText("" + Constants.TGS_PORT);
         _portToListenField.setText("" + Constants.CLIENT1_PORT);
