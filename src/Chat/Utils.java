@@ -1,8 +1,21 @@
 package Chat;
+import java.io.File;
+import java.io.IOException;
+import java.io.InputStream;
+import java.net.MalformedURLException;
+import java.net.URI;
+import java.net.URL;
+import java.security.Key;
+import java.security.KeyStore;
+import java.security.KeyStoreException;
 import java.security.MessageDigest;
+import java.security.NoSuchAlgorithmException;
 import java.util.Scanner;
 import javax.xml.bind.DatatypeConverter;
 import java.security.Security;
+import java.security.UnrecoverableKeyException;
+import java.security.cert.CertificateException;
+
 import javax.crypto.Cipher;
 import javax.crypto.spec.SecretKeySpec;
 import javax.crypto.spec.IvParameterSpec;
@@ -51,6 +64,11 @@ public class Utils {
 	    }
 	    return result;
 	}
+	
+	public static String hash( String str) {
+		
+		return hash( str, HashType.SHA1);
+	}
 
 	public static String encrypt_aes(String key, String initVector, String input){
         try {
@@ -85,5 +103,67 @@ public class Utils {
         }
 
         return null;
+    }
+    
+    public static Key getKey( String keyStoreFileName, String keyStorePassword, String alias, String password) {
+    	
+    	File keyStoreFile = new File( keyStoreFileName);
+    	KeyStore keyStore = null;
+    	System.out.println("Initializing key store: " + keyStoreFile.getAbsolutePath());
+    	URI keyStoreUri = keyStoreFile.toURI();
+    	InputStream is = null;
+    	try {
+    		
+    		URL keyStoreUrl = keyStoreUri.toURL();
+        	keyStore = KeyStore.getInstance( "JKS");
+    		is = keyStoreUrl.openStream();
+    		keyStore.load(is, null == password ? null : password.toCharArray());
+    		System.out.println("Loaded key store");
+    	} catch (KeyStoreException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		} catch (MalformedURLException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		} catch (NoSuchAlgorithmException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		} catch (CertificateException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		} catch (IOException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		} finally {
+    		if (null != is) {
+    			try {
+					is.close();
+				} catch (IOException e) {
+					// TODO Auto-generated catch block
+					e.printStackTrace();
+				}
+    		}
+    	}
+    	
+    	try {
+			if( !keyStore.isKeyEntry( alias)) {
+				
+				System.out.println( "no key alias found");
+				return null;
+			}
+			
+			return keyStore.getKey(alias, password.toCharArray());
+		} catch (KeyStoreException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		} catch (UnrecoverableKeyException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		} catch (NoSuchAlgorithmException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+    	
+    	return null;
     }
 }

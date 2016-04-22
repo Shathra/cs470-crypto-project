@@ -195,7 +195,6 @@ public class ChatClient extends Thread {
                     _socket.getInputStream()));
             
             connected = true;
-            System.out.println( "here");
             Socket asSocket = new Socket( Constants.HOST, asPort);
             PrintWriter asOut = new PrintWriter(asSocket.getOutputStream(), true);
 
@@ -253,9 +252,7 @@ public class ChatClient extends Thread {
 	            waitDialog = new JDialog((JFrame) SwingUtilities.getWindowAncestor(_loginPanel), "Please Wait", Dialog.ModalityType.DOCUMENT_MODAL);
 	            waitDialog.setLayout( new GridBagLayout());
 	            waitDialog.setSize(300,100);
-	            //JPanel panelInside = new JPanel( new BorderLayout());
 	            waitDialog.add( new JLabel( "...waiting a participant..."));
-	            //d.add( panelInside);
 	            waitDialog.setLocationRelativeTo((JFrame) SwingUtilities.getWindowAncestor(_loginPanel));
 	            waitDialog.setVisible(true);
 	            
