@@ -56,7 +56,36 @@ public class TGServerThread extends Thread {
                 Socket socket = _serverSocket.accept();
                 //
                 //  Got the connection, now do what is required
-                //  
+                // 
+                Socket asSocket = new Socket( Constants.HOST, Constants.TGS_PORT);
+                
+                PrintWriter asOut = new PrintWriter(asSocket.getOutputStream(), true);
+                BufferedReader asIn = new BufferedReader(new InputStreamReader(
+                        asSocket.getInputStream()));
+                
+                String kKDC = Utils.getKey(Constants.keyStoreFileName, Constants.keyStorePassword, "KDC", Constants.KDCpassword);
+                String kAB = Utils.getKey(Constants.keyStoreFileName, Constants.keyStorePassword, "AB", Constants.ABpassword);
+                String kB = Utils.getKey(Constants.keyStoreFileName, Constants.keyStorePassword, "B", Constants.Bpassword);
+                
+                String [] input = asIn.readLine().split(" ");
+                String idA_tocheck = input[0];
+                String idB = input[1];
+                String TGT = input[2];
+                
+                String [] TGT_in = Utils.decrypt_aes(kKDC, Utils.initVector, TGT).split(" ");
+                String sA = TGT_in[0];
+                String idA = TGT_in[1];
+                
+                String timestamp = Utils.decrypt_aes(sA, Utils.initVector, input[3]);
+
+                if(idA_tocheck == idA){
+                	asOut.println( Utils.encrypt_aes(sA, Utils.initVector, idB+" "+kAB+" "+Utils.encrypt_aes(kB, Utils.initVector, idA+" "+kAB)));
+                }
+                else{
+                	System.out.println("Your ID is wrong!");
+                }
+                
+                
             }
         } catch (Exception e) {
             System.out.println("AS thread error: " + e.getMessage());

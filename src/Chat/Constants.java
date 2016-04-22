@@ -12,4 +12,11 @@ public class Constants {
 	public static final String KA = "Bar12345Bar12345";
 	public static final String IV = "RandomInitVector";
 	public static final String USERNAME = "superman";
+	
+	public static final String keyStoreFileName = "";
+	public static final String keyStorePassword = "";
+	public static final String KDCpassword = "";
+	public static final String Apassword = "";
+	public static final String Bpassword = "";
+	public static final String ABpassword = "";
 }
