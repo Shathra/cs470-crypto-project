@@ -35,8 +35,8 @@ public class AuthServerThread extends Thread {
     private String asKeyStoreFilename;
     private String asKeyStorePassword;
     
-    private static final String kaAlias = "clientA";
-    private static final String kbAlias = "clientB";
+    private static final String kaAlias = "clienta";
+    private static final String kbAlias = "clientb";
     private static final String kaPassword = "passwordA";
     private static final String kbPassword = "passwordB";
     private static final String kkdcAlias = "kdc";
@@ -48,9 +48,9 @@ public class AuthServerThread extends Thread {
 
         super("AuthServerThread");
         
-        HashMap<String, String> passTable = new HashMap<String, String>();
-        passTable.put( "kaAlias", kaPassword);
-        passTable.put( "kbAlias", kbPassword);
+        passTable = new HashMap<String, String>();
+        passTable.put( kaAlias, kaPassword);
+        passTable.put( kbAlias, kbPassword);
         
         _as = as;
         _portNum = as.getPortNumber();
@@ -85,7 +85,7 @@ public class AuthServerThread extends Thread {
     	        BufferedReader in = new BufferedReader(new InputStreamReader(
     	                socket.getInputStream()));
                 
-    	        _outputArea.append( "Got socket");
+    	        _outputArea.append( "\nGot socket");
     	        
     	        String msg;
     	        boolean passwordCorrect = false;
@@ -96,12 +96,20 @@ public class AuthServerThread extends Thread {
                 String id = msg.split( " ")[0];
                 String hash = msg.split( " ")[1];
                 
+                _outputArea.append( "\n" + msg);
                 if( passTable.containsKey( id)) {
                 
-	                if( hash.equals( Utils.getKey( asKeyStoreFilename, asKeyStorePassword, id, passTable.get(id))))
+                	
+                	String kA = Utils.getKey( asKeyStoreFilename, asKeyStorePassword, id, passTable.get(id));
+                	String ourHash = Utils.hash( kA);
+	                if( hash.equals( ourHash))
 	                	passwordCorrect = true;
 	                
-	                _outputArea.append( "Request from " + id + " received\n");
+	                _outputArea.append( "\n" + asKeyStoreFilename + "-" + asKeyStorePassword);
+	                _outputArea.append( "\nOur key: " + kA);
+	                _outputArea.append( "\nOur hash: " + ourHash);
+	                _outputArea.append( "\nReceived hash " + hash);
+	                _outputArea.append( "\nRequest from " + id + " received " + passTable.get(id) + "\n");
 	                
 	                //Check if password is correct
                 }

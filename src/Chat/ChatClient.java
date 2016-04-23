@@ -89,6 +89,14 @@ public class ChatClient extends Thread {
     public void run() {
     	
     	System.out.println( "Listening started");
+    	
+    	/*String key = Utils.getKey( "as.jceks", "passwordAS", "clientb", "passwordB");
+    	String key2 = Utils.getKey( "storeB.jceks", "passwordB", "clientb", "passwordB");
+    	String key3 = Utils.getKey( "storeB.jceks", "passwordB", "clientb", "passwordB");
+    	System.out.println( "KEY: " + key);
+    	System.out.println( "KEY: " + key2);
+    	System.out.println( "KEY: " + key3);*/
+
     	try {
 			_socket = _serverSocket.accept();
 			System.out.println( "Listening ends");
@@ -201,8 +209,8 @@ public class ChatClient extends Thread {
             BufferedReader asIn = new BufferedReader(new InputStreamReader(
                     asSocket.getInputStream()));
             
-            asOut.println( loginName + " " + Utils.hash( Constants.KA));
-            System.out.println( "send login name");
+            asOut.println( loginName + " " + Utils.hash( kA));
+            System.out.println( "send :" + kA);
             
             String msg = asIn.readLine();
             msg = msg.trim();

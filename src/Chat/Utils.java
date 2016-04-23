@@ -10,6 +10,7 @@ import java.security.KeyStore;
 import java.security.KeyStoreException;
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
+import java.util.Base64;
 import java.util.Scanner;
 import javax.xml.bind.DatatypeConverter;
 import java.security.Security;
@@ -29,27 +30,6 @@ public class Utils {
 	    private final String value;
 	    HashType(String value) { this.value = value; }
 	    public String getValue() { return value; }
-	}
-	
-	public static void main(String[] args) {
-		/*
-	    Scanner sn = new Scanner(System.in);
-	    System.out.print("Please enter data for which SHA256 is required:");
-	    String data = sn.nextLine();		
-	    System.out.println("The SHA256 (hexadecimal encoded) hash is:"+hash(data,HashType.MD5));
-		
-        String key = "Bar12345Bar12345"; // 128 bit key
-        String initVector = "RandomInitVector"; // 16 bytes IV
-		Scanner sn = new Scanner(System.in);
-	    System.out.print("Please enter data to encrypte:");
-	    String data = sn.nextLine();
-	    String encrypted = encrypt_aes(key,initVector,data);
-	    System.out.println("encrypted string: "+ encrypted);
-	    String decrypted = decrypt_aes(key,initVector,encrypted);
-	    System.out.println("decrypted string: "+ decrypted);
-        System.out.println(decrypt_aes(key, initVector,
-                encrypt_aes(key, initVector, "Hello World")));
-		*/
 	}
 	
 	public static String hash(String str, HashType type) {
@@ -107,7 +87,7 @@ public class Utils {
     
     public static String keyToString( Key key) {
     	
-    	return String.valueOf( key.getEncoded());
+    	return Base64.getEncoder().encodeToString( key.getEncoded());
     }
     
     public static String getKey( String keyStoreFileName, String keyStorePassword, String alias, String password) {
@@ -122,8 +102,7 @@ public class Utils {
     		URL keyStoreUrl = keyStoreUri.toURL();
         	keyStore = KeyStore.getInstance( "JCEKS");
     		is = keyStoreUrl.openStream();
-    		keyStore.load(is, null == password ? null : password.toCharArray());
-    		System.out.println("Loaded key store");
+    		keyStore.load(is, keyStorePassword.toCharArray());
     	} catch (KeyStoreException e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
@@ -158,7 +137,7 @@ public class Utils {
 			}
 			
 			Key key = keyStore.getKey(alias, password.toCharArray());
-			return String.valueOf( key.getEncoded());
+			return Utils.keyToString(key);
 		} catch (KeyStoreException e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();

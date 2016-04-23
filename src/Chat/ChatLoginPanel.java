@@ -24,6 +24,7 @@ public class ChatLoginPanel extends JPanel {
     JPasswordField _keyStorePasswordField;
     JLabel _errorLabel;
     JButton _connectButton;
+    JButton _switchButton;
     ChatClient _client;
 
     public ChatLoginPanel(ChatClient client) {
@@ -82,7 +83,7 @@ public class ChatLoginPanel extends JPanel {
 
         // just for testing purpose
 
-        _loginNameField.setText("clientA");
+        _loginNameField.setText("clienta");
         _passwordField.setText("passwordA");
         _keyStoreNameField.setText("storeA.jceks");
         _keyStorePasswordField.setText("passwordA");
@@ -94,16 +95,33 @@ public class ChatLoginPanel extends JPanel {
         _errorLabel.setForeground(Color.red);
 
         _connectButton = new JButton("Connect");
+        _switchButton = new JButton( "Switch Values");
         c.gridx = 1;
         c.gridy = 10;
         c.gridwidth = 2;
         gridBag.setConstraints(_connectButton, c);
+        c.gridx = 2;
+        gridBag.setConstraints(_switchButton, c);
         add(_connectButton);
+        add(_switchButton);
 
         _connectButton.addActionListener(new ActionListener() {
 
             public void actionPerformed(ActionEvent e) {
                 connect();
+            }
+        });
+        
+        _switchButton.addActionListener(new ActionListener() {
+
+            public void actionPerformed(ActionEvent e) {
+                
+            	_loginNameField.setText("clientb");
+                _passwordField.setText("passwordB");
+                _keyStoreNameField.setText("storeB.jceks");
+                _keyStorePasswordField.setText("passwordB");
+                _portToListenField.setText("" + Constants.CLIENT2_PORT);
+                _portToConnectField.setText("" + Constants.CLIENT1_PORT);
             }
         });
     }

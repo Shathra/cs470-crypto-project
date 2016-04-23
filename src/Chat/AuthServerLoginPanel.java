@@ -44,13 +44,16 @@ public class AuthServerLoginPanel extends JPanel {
 
         _keystoreFileNameField = new JTextField();
         addField(gridBag, _keystoreFileNameField, 2, 1, 1, 1);
+        _keystoreFileNameField.setText( "as.jceks");
 
         _privateKeyPassField = new JPasswordField();
         _privateKeyPassField.setEchoChar('*');
         addField(gridBag, _privateKeyPassField, 2, 2, 1, 1);
+        _privateKeyPassField.setText( "passwordAS");
   
         _portField = new JTextField();
         addField(gridBag, _portField, 2, 5, 1, 1);
+        _portField.setText( "7777");
 
         _errorLabel = addLabel(gridBag, " ", SwingConstants.CENTER, 1, 6, 2, 1);
 
