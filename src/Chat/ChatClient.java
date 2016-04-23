@@ -12,29 +12,23 @@ import java.awt.*;
 import java.awt.event.*;
 import javax.swing.*;
 
-import Chat.Utils.HashType;
 
 //  Java
 import java.io.*;
-import java.math.BigInteger;
 
 // socket
-import java.net.*;
-import java.io.*;
 import java.net.*;
 
 
 
 //  Crypto
 import java.security.*;
-import java.security.cert.*;
-import java.security.spec.*;
+import java.text.ParseException;
+import java.text.SimpleDateFormat;
+import java.util.Calendar;
+import java.util.Date;
 import java.util.HashMap;
-import java.security.interfaces.*;
-import javax.crypto.*;
-import javax.crypto.spec.*;
-import javax.crypto.interfaces.*;
-import javax.security.auth.x500.*;
+import java.util.concurrent.TimeUnit;
 
 public class ChatClient extends Thread {
 
@@ -43,7 +37,6 @@ public class ChatClient extends Thread {
     public static final int BAD_HOST = 2;
     public static final int ERROR = 3;
     String _loginName;
-    ChatServer _server;
     ChatClientThread _thread;
     ChatLoginPanel _loginPanel;
     ChatRoomPanel _chatPanel;
@@ -51,6 +44,7 @@ public class ChatClient extends Thread {
     BufferedReader _in = null;
     CardLayout _layout;
     JFrame _appFrame;
+    String kAB;
 
     Socket _socket = null;
     SecureRandom secureRandom;
@@ -75,7 +69,6 @@ public class ChatClient extends Thread {
     	clientTable.put( 5002, "clientb");
     	
         _loginName = null;
-        _server = null;
 
         try {
             initComponents();
@@ -95,19 +88,9 @@ public class ChatClient extends Thread {
     }
     
     public void run() {
-    	
-    	System.out.println( "Listening started");
- 
-    	
-    	/*String key = Utils.getKey( "as.jceks", "passwordAS", "clientb", "passwordB");
-    	String key2 = Utils.getKey( "storeB.jceks", "passwordB", "clientb", "passwordB");
-    	String key3 = Utils.getKey( "storeB.jceks", "passwordB", "clientb", "passwordB");
-    	System.out.println( "KEY: " + key);
-    	System.out.println( "KEY: " + key2);
-    	System.out.println( "KEY: " + key3);*/
 
     	try {
-			_socket = _serverSocket.accept();
+			//_socket = _serverSocket.accept();
 			System.out.println( "Listening ends");
 			waitDialog.setVisible(false);
 			waitDialog.dispatchEvent(new WindowEvent(
@@ -227,6 +210,7 @@ public class ChatClient extends Thread {
             String sA = Utils.decrypt_aes( kA, Constants.IV, session);
             String tgt = msg.split( " ")[1];
             asSocket.close();
+            
             //TGS
             Socket tgsSocket = new Socket( Constants.HOST, tgsPort);
             PrintWriter tgsOut = new PrintWriter(tgsSocket.getOutputStream(), true);
@@ -242,10 +226,33 @@ public class ChatClient extends Thread {
             msg = tgsIn.readLine().trim();
             String[] msgInput = Utils.decrypt_aes(sA, Constants.IV, msg).split( " ");
             
-            String kAB = msgInput[1];
+            kAB = msgInput[1];
             String ticket = msgInput[2];
             
             tgsSocket.close();
+            
+            String current = Utils.getCurrentTimestamp();
+            //Communication Initialization
+            _out.println( idA + " " + ticket + " " + Utils.encrypt_aes( kAB, Constants.IV, current));
+            
+            msg = _in.readLine().trim();
+            String receivedTimestamp = Utils.decrypt_aes( kAB, Constants.IV, msg);
+            
+            SimpleDateFormat dateFormat = new SimpleDateFormat("dd-MM-yyyy HH:mm:ss");
+        	Date receivedTime = dateFormat.parse( receivedTimestamp);
+        	Date currentTime = dateFormat.parse( current);
+        	System.out.println( receivedTime);
+        	System.out.println( currentTime);
+            long diffInMillies = receivedTime.getTime() - currentTime.getTime();
+        	TimeUnit timeUnit = TimeUnit.SECONDS;
+            long diff = timeUnit.convert(diffInMillies,TimeUnit.MILLISECONDS);
+            
+            System.out.println( diff);
+            if( diff != 1) {
+            	
+            	System.out.println( "Timestamp check failed");
+            	return ERROR;
+            }
 
             _layout.show(_appFrame.getContentPane(), "ChatRoom");
             _thread = new ChatClientThread(this);
@@ -258,7 +265,7 @@ public class ChatClient extends Thread {
             System.exit(1);
 
         } catch (IOException e) {
-
+        	
         	if( !connected)
         		listen = true;
         	
@@ -284,13 +291,74 @@ public class ChatClient extends Thread {
         	try {
         		
 				_serverSocket = new ServerSocket(portToListen);
-	            this.start();
-	            waitDialog = new JDialog((JFrame) SwingUtilities.getWindowAncestor(_loginPanel), "Please Wait", Dialog.ModalityType.DOCUMENT_MODAL);
+				_socket = _serverSocket.accept();
+				
+	            /*waitDialog = new JDialog((JFrame) SwingUtilities.getWindowAncestor(_loginPanel), "Please Wait", Dialog.ModalityType.DOCUMENT_MODAL);
 	            waitDialog.setLayout( new GridBagLayout());
 	            waitDialog.setSize(300,100);
 	            waitDialog.add( new JLabel( "...waiting a participant..."));
 	            waitDialog.setLocationRelativeTo((JFrame) SwingUtilities.getWindowAncestor(_loginPanel));
-	            waitDialog.setVisible(true);
+	            waitDialog.setVisible(true);*/
+				
+				_out = new PrintWriter(_socket.getOutputStream(), true);
+	            _in = new BufferedReader(new InputStreamReader(
+	                    _socket.getInputStream()));
+	            
+	            String msg = _in.readLine().trim();
+	            
+	            String[] msgInput = msg.split( " ");
+	            
+	            String kB = Utils.getKey( keyStoreName, String.valueOf( keyStorePassword), loginName, String.valueOf( password));
+	            
+	            String idA = msgInput[0];
+	            String ticket = Utils.decrypt_aes( kB, Constants.IV, msgInput[1]);
+	            String idADec = ticket.split( " ")[0];
+	            kAB = ticket.split( " ")[1];
+	            String timestamp = Utils.decrypt_aes( kAB, Constants.IV, msgInput[2]);
+	            
+	            if( !idA.equals( idADec))
+	            	return ERROR;
+	            
+	            if( !Utils.checkTimestamp(timestamp))
+	            	return ERROR;
+	            
+	            
+	            String timestampRespond = "";
+	            
+	            SimpleDateFormat dateFormat = new SimpleDateFormat("dd-MM-yyyy HH:mm:ss");
+	        	Date receivedTime = null;
+				try {
+					receivedTime = dateFormat.parse( timestamp);
+				} catch (ParseException e) {
+					// TODO Auto-generated catch block
+					e.printStackTrace();
+				}
+	        	
+	        	Calendar cal = Calendar.getInstance(); // creates calendar
+	            cal.setTime(receivedTime); // sets calendar time/date
+	            cal.add(Calendar.SECOND, 1); //Add one month
+	            Date d = cal.getTime();
+	            
+	        	timestampRespond  = dateFormat.format(d);
+	            
+	        	
+	            _out.println( Utils.encrypt_aes( kAB, Constants.IV, timestampRespond));
+	            		
+	            //this.start();
+	            
+				/*System.out.println( "Listening ends");
+				waitDialog.setVisible(false);
+				waitDialog.dispatchEvent(new WindowEvent(
+				waitDialog, WindowEvent.WINDOW_CLOSING));
+				_out = new PrintWriter(_socket.getOutputStream(), true);
+
+		        _in = new BufferedReader(new InputStreamReader(
+		                _socket.getInputStream()));*/
+
+		        _layout.show(_appFrame.getContentPane(), "ChatRoom");
+
+		        _thread = new ChatClientThread(this);
+		        _thread.start();
 	            
 	            return SUCCESS;
 			} catch (IOException e) {
@@ -312,9 +380,11 @@ public class ChatClient extends Thread {
         try {
 
             msg = _loginName + "> " + msg;
-
-            _out.println(msg);
+            String mac = Utils.generateMAC( msg, kAB);
             getOutputArea().append(msg + "\n");
+            msg = Utils.encrypt_aes( kAB, Constants.IV, msg);
+            
+            _out.println(msg + " " + mac);
 
         } catch (Exception e) {
 
@@ -333,4 +403,9 @@ public class ChatClient extends Thread {
 
         return _chatPanel.getOutputArea();
     }
+
+	public String getKAB() {
+		
+		return kAB;
+	}
 }

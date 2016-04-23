@@ -25,6 +25,7 @@ public class ChatClientThread extends Thread {
     private ChatClient _client;
     private JTextArea _outputArea;
     private Socket _socket = null;
+    private String kAB;
     
     //Server related fields
     private ServerSocket _serverSocket = null;
@@ -35,6 +36,7 @@ public class ChatClientThread extends Thread {
         _client = client;
         _socket = client.getSocket();
         _outputArea = client.getOutputArea();
+        kAB = client.getKAB();
     }
 
     public void run() {
@@ -49,7 +51,17 @@ public class ChatClientThread extends Thread {
 
             while ((msg = in.readLine()) != null) {
 
-                consumeMessage(msg);
+            	msg = msg.trim();
+            	String msg_enc = msg.split( " ")[0];
+            	String mac = msg.split( " ")[1];
+            	String msg_dec = Utils.decrypt_aes(kAB, Constants.IV, msg_enc);
+            	String macComputed = Utils.generateMAC(msg_dec, kAB);
+            	
+            	if( macComputed.equals(mac))
+            		consumeMessage(msg_dec);
+            	
+            	else
+            		consumeMessage( "System> EVE ATTACKED");
             }
 
             _socket.close();

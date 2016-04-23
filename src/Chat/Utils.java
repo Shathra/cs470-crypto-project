@@ -206,6 +206,7 @@ public class Utils {
     
     public static String generateMAC(String message, String key_str){
 
+    	
 		try {
 			 
 			Key key = stringToKey(key_str, "HmacSHA256");
@@ -220,8 +221,9 @@ public class Utils {
 			// create a digest from the byte array
 			byte[] digest = mac.doFinal(b);
 			
-			String s = new String(digest);
-			return s;
+			
+			String s = new String(digest, "UTF-8");
+			return Utils.hash( s);
 	 
 		}
 		catch (NoSuchAlgorithmException e) {
