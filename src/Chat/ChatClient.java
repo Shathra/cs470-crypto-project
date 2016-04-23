@@ -179,8 +179,7 @@ public class ChatClient extends Thread {
 
             _loginName = loginName;
 
-            Key kA = Utils.getKey(keyStoreName, String.valueOf( keyStorePassword), loginName, String.valueOf(password));
-            System.out.println( String.valueOf( kA.getEncoded()));
+            String kA = Utils.getKey(keyStoreName, String.valueOf( keyStorePassword), loginName, String.valueOf(password));
             //
             //  Read the client keystore
             //         (for its private/public keys)
@@ -202,7 +201,7 @@ public class ChatClient extends Thread {
             BufferedReader asIn = new BufferedReader(new InputStreamReader(
                     asSocket.getInputStream()));
             
-            asOut.println( loginName + " " + Utils.hash( Constants.KA, HashType.MD5));
+            asOut.println( loginName + " " + Utils.hash( Constants.KA));
             System.out.println( "send login name");
             
             String msg = asIn.readLine();

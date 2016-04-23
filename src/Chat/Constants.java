@@ -8,15 +8,6 @@ public class Constants {
 	public static final int CLIENT2_PORT = 5002;
 	public static final String HOST = "127.0.0.1";
 	
-	//TEST VALUES
-	public static final String KA = "Bar12345Bar12345";
 	public static final String IV = "RandomInitVector";
 	public static final String USERNAME = "superman";
-	
-	public static final String keyStoreFileName = "";
-	public static final String keyStorePassword = "";
-	public static final String KDCpassword = "";
-	public static final String Apassword = "";
-	public static final String Bpassword = "";
-	public static final String ABpassword = "";
 }

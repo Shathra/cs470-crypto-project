@@ -18,6 +18,7 @@ import Chat.Utils.HashType;
 //  Crypto
 import java.security.*;
 import java.security.spec.*;
+import java.util.HashMap;
 import java.security.interfaces.*;
 import javax.crypto.*;
 import javax.crypto.spec.*;
@@ -30,15 +31,34 @@ public class AuthServerThread extends Thread {
     private int _portNum;
     private String _hostName;
     private JTextArea _outputArea;
+    
+    private String asKeyStoreFilename;
+    private String asKeyStorePassword;
+    
+    private static final String kaAlias = "clientA";
+    private static final String kbAlias = "clientB";
+    private static final String kaPassword = "passwordA";
+    private static final String kbPassword = "passwordB";
+    private static final String kkdcAlias = "kdc";
+    private static final String kkdcPassword = "passwordKDC";
+    
+    private HashMap<String, String> passTable;
 
     public AuthServerThread(AuthServer as) {
 
         super("AuthServerThread");
+        
+        HashMap<String, String> passTable = new HashMap<String, String>();
+        passTable.put( "kaAlias", kaPassword);
+        passTable.put( "kbAlias", kbPassword);
+        
         _as = as;
         _portNum = as.getPortNumber();
         _outputArea = as.getOutputArea();
         _serverSocket = null;
 
+        asKeyStoreFilename = _as.getAsKeyStoreName();
+        asKeyStorePassword = _as.getAsKeyStorePassword();
         try {
 
             InetAddress serverAddr = InetAddress.getByName(null);
@@ -76,16 +96,29 @@ public class AuthServerThread extends Thread {
                 String id = msg.split( " ")[0];
                 String hash = msg.split( " ")[1];
                 
-                _outputArea.append( "Request from " + id + " received\n");
+                if( passTable.containsKey( id)) {
                 
-                //Check if password is correct
-                if( id.equals( Constants.USERNAME) && Utils.hash( Constants.KA, HashType.MD5).equals(hash))
-                	passwordCorrect = true;
-                
+	                if( hash.equals( Utils.getKey( asKeyStoreFilename, asKeyStorePassword, id, passTable.get(id))))
+	                	passwordCorrect = true;
+	                
+	                _outputArea.append( "Request from " + id + " received\n");
+	                
+	                //Check if password is correct
+                }
                 if( passwordCorrect) {
                 	
+                	Key saKey;
+                	SecureRandom rand = new SecureRandom();
+                	KeyGenerator generator = KeyGenerator.getInstance("AES");
+                	generator.init(rand);
+                	generator.init(128);
+                	saKey = generator.generateKey();
+                	String sA = Utils.keyToString( saKey);
                 	
-                	out.println( "session-key TGT\n");
+                	String kKDC = Utils.getKey( asKeyStoreFilename, asKeyStorePassword, kkdcAlias, kkdcPassword);
+                	String tgt = Utils.encrypt_aes( kKDC, Constants.IV, sA + " " + id);
+                	String kA = Utils.getKey( asKeyStoreFilename, asKeyStorePassword, id, passTable.get( id));
+                	out.println( Utils.encrypt_aes( kA, Constants.IV, sA) + " "+ tgt);
                 	System.out.println( "Passwrod correct");
                 }
                 

@@ -43,8 +43,19 @@ public class AuthServer {
     AuthServerThread _thread;
     //  Port number to listen on
     private int _portNum;
+    
+    private String asKeyStoreName;
+    private String asKeyStorePassword;
 
-    //  Data structures to hold the authentication
+    public String getAsKeyStoreName() {
+		return asKeyStoreName;
+	}
+
+	public String getAsKeyStorePassword() {
+		return asKeyStorePassword;
+	}
+
+	//  Data structures to hold the authentication
     //  information read from the file
     //  ............
     //  ............
@@ -113,8 +124,10 @@ public class AuthServer {
     //  Start up the AS server
     //
     public int startup(String _ksFileName, char[] _privateKeyPass, int _asPort) {
-        _portNum = _asPort;
 
+    	this._portNum = _asPort;
+    	this.asKeyStoreName = _ksFileName;
+    	this.asKeyStorePassword = String.valueOf( _privateKeyPass);
         //
         //  Read the AS keystore (i.e. its private key)
         //  Failure codes to return are defined on the top

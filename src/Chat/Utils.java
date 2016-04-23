@@ -105,7 +105,12 @@ public class Utils {
         return null;
     }
     
-    public static Key getKey( String keyStoreFileName, String keyStorePassword, String alias, String password) {
+    public static String keyToString( Key key) {
+    	
+    	return String.valueOf( key.getEncoded());
+    }
+    
+    public static String getKey( String keyStoreFileName, String keyStorePassword, String alias, String password) {
     	
     	File keyStoreFile = new File( keyStoreFileName);
     	KeyStore keyStore = null;
@@ -152,7 +157,8 @@ public class Utils {
 				return null;
 			}
 			
-			return keyStore.getKey(alias, password.toCharArray());
+			Key key = keyStore.getKey(alias, password.toCharArray());
+			return String.valueOf( key.getEncoded());
 		} catch (KeyStoreException e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
