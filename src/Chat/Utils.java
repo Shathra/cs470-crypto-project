@@ -46,6 +46,7 @@ public class Utils {
 	    public String getValue() { return value; }
 	}
 	
+	
 	public static String hash(String str, HashType type) {
 		
 	    String result = null;
@@ -104,10 +105,10 @@ public class Utils {
     	return Base64.getEncoder().encodeToString( key.getEncoded());
     }
     
-    public static Key stringToKey( String str) {
+    public static Key stringToKey( String str, String algorithm) {
     	
     	byte[] decodedKey = Base64.getDecoder().decode(str);
-    	Key key = new SecretKeySpec(decodedKey, 0, decodedKey.length, "AES");
+    	Key key = new SecretKeySpec(decodedKey, 0, decodedKey.length, algorithm);
     	return key;
     }  
     
@@ -203,14 +204,11 @@ public class Utils {
     	return false;
     }
     
-    public static String GenerateMAC(String message, String key_str){
+    public static String generateMAC(String message, String key_str){
 
 		try {
 			 
-			// get a key generator for the HMAC-SHA256 keyed-hashing algorithm
-			KeyGenerator keyGen = KeyGenerator.getInstance("HmacSHA256");
-			 
-			Key key = stringToKey(key_str);
+			Key key = stringToKey(key_str, "HmacSHA256");
    
 			// create a MAC and initialize with the above key
 			Mac mac = Mac.getInstance(key.getAlgorithm());
@@ -222,7 +220,8 @@ public class Utils {
 			// create a digest from the byte array
 			byte[] digest = mac.doFinal(b);
 			
-			return String.valueOf(digest);
+			String s = new String(digest);
+			return s;
 	 
 		}
 		catch (NoSuchAlgorithmException e) {
