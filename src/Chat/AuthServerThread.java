@@ -13,16 +13,10 @@ import java.io.*;
 // Swing
 import javax.swing.JTextArea;
 
-import Chat.Utils.HashType;
-
 //  Crypto
 import java.security.*;
-import java.security.spec.*;
 import java.util.HashMap;
-import java.security.interfaces.*;
 import javax.crypto.*;
-import javax.crypto.spec.*;
-import javax.crypto.interfaces.*;
 
 public class AuthServerThread extends Thread {
 
@@ -76,45 +70,42 @@ public class AuthServerThread extends Thread {
             _outputArea.append("AS waiting on " + _hostName + " port " + _portNum);
             while (true) {
                 Socket socket = _serverSocket.accept();
-                //
+
                 //  Got the connection, now do what is required
-                //
                 
                 PrintWriter out = new PrintWriter(socket.getOutputStream(), true);
 
     	        BufferedReader in = new BufferedReader(new InputStreamReader(
     	                socket.getInputStream()));
-                
-    	        _outputArea.append( "\nGot socket");
     	        
     	        String msg;
     	        boolean passwordCorrect = false;
 
+    	        //The following message is received from client, id_a, H(K_A)
 				msg = in.readLine();
 				
 				msg = msg.trim();
                 String id = msg.split( " ")[0];
                 String hash = msg.split( " ")[1];
                 
-                _outputArea.append( "\n" + msg);
+                _outputArea.append( "\nRequest from " + id + " received ");
+                
                 if( passTable.containsKey( id)) {
                 
-                	
+                	//Here it checks whether password user give and the password AS have matches with each other
                 	String kA = Utils.getKey( asKeyStoreFilename, asKeyStorePassword, id, passTable.get(id));
                 	String ourHash = Utils.hash( kA);
+                	
+                	//Check if password is correct
 	                if( hash.equals( ourHash))
 	                	passwordCorrect = true;
 	                
-	                _outputArea.append( "\n" + asKeyStoreFilename + "-" + asKeyStorePassword);
-	                _outputArea.append( "\nOur key: " + kA);
-	                _outputArea.append( "\nOur hash: " + ourHash);
-	                _outputArea.append( "\nReceived hash " + hash);
-	                _outputArea.append( "\nRequest from " + id + " received " + passTable.get(id) + "\n");
 	                
-	                //Check if password is correct
                 }
+                
                 if( passwordCorrect) {
                 	
+                	//Generates a session key (SA)
                 	Key saKey;
                 	SecureRandom rand = new SecureRandom();
                 	KeyGenerator generator = KeyGenerator.getInstance("AES");
@@ -123,16 +114,19 @@ public class AuthServerThread extends Thread {
                 	saKey = generator.generateKey();
                 	String sA = Utils.keyToString( saKey);
                 	
+                	_outputArea.append( "\nRequest from " + id + " served succesfully ");
+                	
+                	//The following message is sent to client, K_A{S_A}, TGT
                 	String kKDC = Utils.getKey( asKeyStoreFilename, asKeyStorePassword, kkdcAlias, kkdcPassword);
                 	String tgt = Utils.encrypt_aes( kKDC, Constants.IV, sA + " " + id);
                 	String kA = Utils.getKey( asKeyStoreFilename, asKeyStorePassword, id, passTable.get( id));
                 	out.println( Utils.encrypt_aes( kA, Constants.IV, sA) + " "+ tgt);
-                	System.out.println( "Passwrod correct");
                 }
                 
                 else {
                 	
                 	System.out.println( "Password is not correct");
+                	_outputArea.append( "\nRequest from " + id + " couldnt served because password is wrong. ");
                 	socket.close();
                 }
                 

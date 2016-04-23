@@ -11,6 +11,7 @@ import java.awt.*;
 import java.awt.event.*;
 import javax.swing.*;
 
+@SuppressWarnings("serial")
 public class ChatRoomPanel extends JPanel {
 
     JTextArea _inputArea;

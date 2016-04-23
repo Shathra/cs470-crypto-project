@@ -9,6 +9,7 @@ import java.awt.*;
 import java.awt.event.*;
 import javax.swing.*;
 
+@SuppressWarnings("serial")
 public class AuthServerLoginPanel extends JPanel {
 
     JPasswordField _privateKeyPassField;
@@ -32,7 +33,6 @@ public class AuthServerLoginPanel extends JPanel {
     void componentInit() throws Exception {
         GridBagLayout gridBag = new GridBagLayout();
         GridBagConstraints c = new GridBagConstraints();
-        JLabel label;
 
         setLayout(gridBag);
 

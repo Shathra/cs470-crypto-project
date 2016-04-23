@@ -12,6 +12,7 @@ import java.awt.*;
 import java.awt.event.*;
 import javax.swing.*;
 
+@SuppressWarnings("serial")
 public class ChatLoginPanel extends JPanel {
 
     JTextField _loginNameField;
@@ -41,7 +42,6 @@ public class ChatLoginPanel extends JPanel {
     void componentInit() throws Exception {
         GridBagLayout gridBag = new GridBagLayout();
         GridBagConstraints c = new GridBagConstraints();
-        JLabel label;
 
         setLayout(gridBag);
 
@@ -169,8 +169,6 @@ public class ChatLoginPanel extends JPanel {
 
         String keyStoreName = _keyStoreNameField.getText();
         char[] keyStorePassword = _keyStorePasswordField.getPassword();
-
-        String serverHost = Constants.HOST;
 
         if (loginName.equals("")
                 || password.length == 0

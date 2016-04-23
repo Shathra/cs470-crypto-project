@@ -12,33 +12,21 @@ import java.io.*;
 //  Swing
 import javax.swing.JTextArea;
 
-//  Crypto
-import java.security.*;
-import java.security.spec.*;
-import java.security.interfaces.*;
-import javax.crypto.*;
-import javax.crypto.spec.*;
-import javax.crypto.interfaces.*;
-
 public class ChatClientThread extends Thread {
 
-    private ChatClient _client;
     private JTextArea _outputArea;
     private Socket _socket = null;
     private String kAB;
-    
-    //Server related fields
-    private ServerSocket _serverSocket = null;
 
     public ChatClientThread(ChatClient client) {
 
         super("ChatClientThread");
-        _client = client;
         _socket = client.getSocket();
         _outputArea = client.getOutputArea();
         kAB = client.getKAB();
     }
 
+    //This function is executed when all protocol works are completed and clients are ready to communicate
     public void run() {
 
         try {
@@ -51,6 +39,7 @@ public class ChatClientThread extends Thread {
 
             while ((msg = in.readLine()) != null) {
 
+            	//Get message, check MAC and show it on the screen
             	msg = msg.trim();
             	String msg_enc = msg.split( " ")[0];
             	String mac = msg.split( " ")[1];
@@ -60,8 +49,11 @@ public class ChatClientThread extends Thread {
             	if( macComputed.equals(mac))
             		consumeMessage(msg_dec);
             	
-            	else
-            		consumeMessage( "System> EVE ATTACKED");
+            	else {
+            		//When mac does not match
+            		consumeMessage( "System > Mac does not matched, communication is closed");
+            		break;
+            	}
             }
 
             _socket.close();

@@ -12,14 +12,11 @@ import java.awt.*;
 import java.awt.event.*;
 import javax.swing.*;
 
-
 //  Java
 import java.io.*;
 
 // socket
 import java.net.*;
-
-
 
 //  Crypto
 import java.security.*;
@@ -50,14 +47,9 @@ public class ChatClient extends Thread {
     SecureRandom secureRandom;
     KeyStore clientKeyStore;
     KeyStore caKeyStore;
-//    KeyManagerFactory keyManagerFactory;
-//    TrustManagerFactory trustManagerFactory;
 	private ServerSocket _serverSocket;
 	private JDialog waitDialog;
   
-    //  ChatClient Constructor
-    //
-    //  empty, as you can see.
     private HashMap<Integer, String> clientTable;
 	
     public ChatClient() {
@@ -87,31 +79,18 @@ public class ChatClient extends Thread {
 
     }
     
+    //This method shows a "pls wait" dialog
     public void run() {
 
-    	try {
-			//_socket = _serverSocket.accept();
-			System.out.println( "Listening ends");
-			waitDialog.setVisible(false);
-			waitDialog.dispatchEvent(new WindowEvent(
-			waitDialog, WindowEvent.WINDOW_CLOSING));
-			_out = new PrintWriter(_socket.getOutputStream(), true);
-
-	        _in = new BufferedReader(new InputStreamReader(
-	                _socket.getInputStream()));
-
-	        _layout.show(_appFrame.getContentPane(), "ChatRoom");
-
-	        _thread = new ChatClientThread(this);
-	        _thread.start();
-		} catch (IOException e) {
-			System.out.println("ChatClient err: " + e.getMessage());
-            e.printStackTrace();
-		}
+    	waitDialog = new JDialog((JFrame) SwingUtilities.getWindowAncestor(_loginPanel), "...waiting a participant...", Dialog.ModalityType.DOCUMENT_MODAL);
+    	waitDialog.add( new JLabel( "...waiting a participant..."));
+        waitDialog.setLayout( new GridBagLayout());
+        waitDialog.setSize(300,100);
+        waitDialog.setLocationRelativeTo((JFrame) SwingUtilities.getWindowAncestor(_loginPanel));
+        
+        waitDialog.setVisible(true);
     }
 
-    //  main
-    //
     //  Construct the app inside a frame, in the center of the screen
     public static void main(String[] args) {
         
@@ -158,16 +137,8 @@ public class ChatClient extends Thread {
         System.exit(0);
     }
 
-    //
-    //  connect
-    //
     //  Called from the login panel when the user clicks the "connect"
-    //  button. You will need to modify this method to add certificate
-    //  authentication.  
-    //  There are two passwords : the keystorepassword is the password
-    //  to access your private key on the file system
-    //  The other is your authentication password on the CA.
-    //
+    //  button.
     public int connect(String loginName, char[] password,
             String keyStoreName, char[] keyStorePassword,
             int portToListen, int portToConnect,
@@ -179,14 +150,8 @@ public class ChatClient extends Thread {
 
             _loginName = loginName;
 
+            
             String kA = Utils.getKey(keyStoreName, String.valueOf( keyStorePassword), loginName, String.valueOf(password));
-            //
-            //  Read the client keystore
-            //         (for its private/public keys)
-            //  Establish secure connection to the CA
-            //  Send public key and get back certificate
-            //  Use certificate to establish secure connection with server
-            //
 
             _socket = new Socket(Constants.HOST, portToConnect);
             _out = new PrintWriter(_socket.getOutputStream(), true);
@@ -194,6 +159,7 @@ public class ChatClient extends Thread {
             _in = new BufferedReader(new InputStreamReader(
                     _socket.getInputStream()));
             
+          //COMMUNICATION WITH AS
             connected = true;
             Socket asSocket = new Socket( Constants.HOST, asPort);
             PrintWriter asOut = new PrintWriter(asSocket.getOutputStream(), true);
@@ -202,7 +168,6 @@ public class ChatClient extends Thread {
                     asSocket.getInputStream()));
             
             asOut.println( loginName + " " + Utils.hash( kA));
-            System.out.println( "send :" + kA);
             
             String msg = asIn.readLine();
             msg = msg.trim();
@@ -211,7 +176,7 @@ public class ChatClient extends Thread {
             String tgt = msg.split( " ")[1];
             asSocket.close();
             
-            //TGS
+            //COMMUNICATION WITH TGS
             Socket tgsSocket = new Socket( Constants.HOST, tgsPort);
             PrintWriter tgsOut = new PrintWriter(tgsSocket.getOutputStream(), true);
 
@@ -232,7 +197,8 @@ public class ChatClient extends Thread {
             tgsSocket.close();
             
             String current = Utils.getCurrentTimestamp();
-            //Communication Initialization
+            
+            //COMMUNICATION INITIALIZATION
             _out.println( idA + " " + ticket + " " + Utils.encrypt_aes( kAB, Constants.IV, current));
             
             msg = _in.readLine().trim();
@@ -241,13 +207,10 @@ public class ChatClient extends Thread {
             SimpleDateFormat dateFormat = new SimpleDateFormat("dd-MM-yyyy HH:mm:ss");
         	Date receivedTime = dateFormat.parse( receivedTimestamp);
         	Date currentTime = dateFormat.parse( current);
-        	System.out.println( receivedTime);
-        	System.out.println( currentTime);
             long diffInMillies = receivedTime.getTime() - currentTime.getTime();
         	TimeUnit timeUnit = TimeUnit.SECONDS;
             long diff = timeUnit.convert(diffInMillies,TimeUnit.MILLISECONDS);
             
-            System.out.println( diff);
             if( diff != 1) {
             	
             	System.out.println( "Timestamp check failed");
@@ -286,19 +249,16 @@ public class ChatClient extends Thread {
             e.printStackTrace();
         }
         
+        //This block runs if a client start its program before other side of communication, so it becomes a listener
         if( listen) {
         	
         	try {
         		
 				_serverSocket = new ServerSocket(portToListen);
-				_socket = _serverSocket.accept();
 				
-	            /*waitDialog = new JDialog((JFrame) SwingUtilities.getWindowAncestor(_loginPanel), "Please Wait", Dialog.ModalityType.DOCUMENT_MODAL);
-	            waitDialog.setLayout( new GridBagLayout());
-	            waitDialog.setSize(300,100);
-	            waitDialog.add( new JLabel( "...waiting a participant..."));
-	            waitDialog.setLocationRelativeTo((JFrame) SwingUtilities.getWindowAncestor(_loginPanel));
-	            waitDialog.setVisible(true);*/
+				this.start();
+
+				_socket = _serverSocket.accept();
 				
 				_out = new PrintWriter(_socket.getOutputStream(), true);
 	            _in = new BufferedReader(new InputStreamReader(
@@ -330,13 +290,12 @@ public class ChatClient extends Thread {
 				try {
 					receivedTime = dateFormat.parse( timestamp);
 				} catch (ParseException e) {
-					// TODO Auto-generated catch block
 					e.printStackTrace();
 				}
 	        	
 	        	Calendar cal = Calendar.getInstance(); // creates calendar
 	            cal.setTime(receivedTime); // sets calendar time/date
-	            cal.add(Calendar.SECOND, 1); //Add one month
+	            cal.add(Calendar.SECOND, 1); //Add one second
 	            Date d = cal.getTime();
 	            
 	        	timestampRespond  = dateFormat.format(d);
@@ -344,16 +303,9 @@ public class ChatClient extends Thread {
 	        	
 	            _out.println( Utils.encrypt_aes( kAB, Constants.IV, timestampRespond));
 	            		
-	            //this.start();
-	            
-				/*System.out.println( "Listening ends");
-				waitDialog.setVisible(false);
+	            waitDialog.setVisible(false);
 				waitDialog.dispatchEvent(new WindowEvent(
 				waitDialog, WindowEvent.WINDOW_CLOSING));
-				_out = new PrintWriter(_socket.getOutputStream(), true);
-
-		        _in = new BufferedReader(new InputStreamReader(
-		                _socket.getInputStream()));*/
 
 		        _layout.show(_appFrame.getContentPane(), "ChatRoom");
 

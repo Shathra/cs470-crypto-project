@@ -10,30 +10,11 @@ import java.awt.*;
 import java.awt.event.*;
 import javax.swing.*;
 
-//  Java
-import java.io.*;
-import java.math.BigInteger;
-
-// socket
-import java.net.*;
-import java.io.*;
-import java.net.*;
-
-//  Crypto
-import java.security.*;
-import java.security.spec.*;
-import java.security.interfaces.*;
-import javax.crypto.*;
-import javax.crypto.spec.*;
-import javax.crypto.interfaces.*;
-
 public class AuthServer {
     
     //  Failure codes
     public static final int SUCCESS = 0;
     public static final int KEYSTORE_FILE_NOT_FOUND = 1;
-//    public static final int PERMISSIONS_FILE_NOT_FOUND = 2;
-//    public static final int PERMISSIONS_FILE_TAMPERED = 3;
     public static final int ERROR = 4;
     //  The GUI
     AuthServerLoginPanel _panel;
@@ -55,10 +36,6 @@ public class AuthServer {
 		return asKeyStorePassword;
 	}
 
-	//  Data structures to hold the authentication
-    //  information read from the file
-    //  ............
-    //  ............
     public AuthServer() throws Exception {
 
         _panel = null;
@@ -77,8 +54,6 @@ public class AuthServer {
 
     }
 
-    //  initialize
-    //  
     //  AS initialization
     private void initialize() throws Exception {
 
@@ -128,17 +103,6 @@ public class AuthServer {
     	this._portNum = _asPort;
     	this.asKeyStoreName = _ksFileName;
     	this.asKeyStorePassword = String.valueOf( _privateKeyPass);
-        //
-        //  Read the AS keystore (i.e. its private key)
-        //  Failure codes to return are defined on the top
-        //
-
-        //
-        //  Note :
-        //    When you return a success DO-NOT forget to show the
-        //    Activity panel using the line below and start the
-        //    thread listening for connections
-        //
 
         _layout.show(_appFrame.getContentPane(), "ActivityPanel");
 
