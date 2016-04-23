@@ -22,7 +22,6 @@ import javax.crypto.spec.SecretKeySpec;
 import javax.crypto.spec.IvParameterSpec;
 
 public class Utils {
-	public final static String initVector = "RandomInitVector";
 	public enum HashType {
 		
 	    MD5("MD5"), SHA1("SHA-1"), SHA256("SHA-256");

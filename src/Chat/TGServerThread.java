@@ -34,9 +34,9 @@ public class TGServerThread extends Thread {
     
     private static final String kaAlias = "clientA";
     private static final String kbAlias = "clientB";
-    private static final String kkdcAlias = "KDC";
     private static final String kaPassword = "passwordA";
     private static final String kbPassword = "passwordB";
+    private static final String kkdcAlias = "kdc";
     private static final String kkdcPassword = "passwordKDC";
     
 
@@ -68,32 +68,39 @@ public class TGServerThread extends Thread {
                 //
                 //  Got the connection, now do what is required
                 // 
-                Socket asSocket = new Socket( Constants.HOST, Constants.TGS_PORT);
                 
-                PrintWriter asOut = new PrintWriter(asSocket.getOutputStream(), true);
+                PrintWriter asOut = new PrintWriter(socket.getOutputStream(), true);
                 BufferedReader asIn = new BufferedReader(new InputStreamReader(
-                        asSocket.getInputStream()));
+                        socket.getInputStream()));
                 
                 String kKDC = Utils.getKey(tgsKeyStoreFileName, tgsKeyStorePassword, kkdcAlias, kkdcPassword);
-                String kAB = Utils.getKey(tgsKeyStoreFileName, tgsKeyStorePassword, "AB", Constants.ABpassword);
                 String kB = Utils.getKey(tgsKeyStoreFileName, tgsKeyStorePassword, kbAlias, kbPassword);
+                
+            	Key abKey;
+            	SecureRandom rand = new SecureRandom();
+            	KeyGenerator generator = KeyGenerator.getInstance("AES");
+            	generator.init(rand);
+            	generator.init(128);
+            	abKey = generator.generateKey();
+            	String kAB = Utils.keyToString( abKey);
                 
                 String [] input = asIn.readLine().split(" ");
                 String idA_tocheck = input[0];
                 String idB = input[1];
                 String TGT = input[2];
                 
-                String [] TGT_in = Utils.decrypt_aes(kKDC, Utils.initVector, TGT).split(" ");
+                String [] TGT_in = Utils.decrypt_aes(kKDC, Constants.IV, TGT).split(" ");
                 String sA = TGT_in[0];
                 String idA = TGT_in[1];
                 
-                String timestamp = Utils.decrypt_aes(sA, Utils.initVector, input[3]);
+                String timestamp = Utils.decrypt_aes(sA, Constants.IV, input[3]);
 
                 if(idA_tocheck == idA){
-                	asOut.println( Utils.encrypt_aes(sA, Utils.initVector, idB+" "+kAB+" "+Utils.encrypt_aes(kB, Utils.initVector, idA+" "+kAB)));
+                	asOut.println( Utils.encrypt_aes(sA, Constants.IV, idB+" "+kAB+" "+Utils.encrypt_aes(kB, Constants.IV, idA+" "+kAB)));
                 }
                 else{
                 	System.out.println("Your ID is wrong!");
+                	socket.close();
                 }
                 
                 
