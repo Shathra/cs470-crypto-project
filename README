@@ -1,0 +1,24 @@
+-Group info
+	Group 1
+	Selçuk Gülcan		21101231
+	A. Berkay Kebeci	21102706
+-How to run code
+	First run AuthServer.class, then run TGServer.class. Finally run ChatClient.class once for client A and once for client B. 
+-Usernames and passwords of the clients
+	Client A
+		Username: 		clienta
+		Password: 		passwordA
+		Key Store Filename: 	storeA.jceks
+		Key Store Password: 	passwordA
+	Client B
+		Username: 		clientb
+		Password: 		passwordB
+		Key Store Filename: 	storeB.jceks
+		Key Store Password: 	passwordB
+-Keystore file names and their passwords (of servers)
+	AS
+		Filename: 		as.jceks
+		Password: 		passwordAS
+	TGS
+		Filename: 		tgs.jceks 
+		Password: 		passwordTGS

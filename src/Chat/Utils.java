@@ -27,6 +27,15 @@ import javax.crypto.Cipher;
 import javax.crypto.spec.SecretKeySpec;
 import javax.crypto.spec.IvParameterSpec;
 
+import javax.crypto.KeyGenerator;
+import javax.crypto.SecretKey;
+import javax.crypto.Mac;
+
+import java.io.UnsupportedEncodingException;
+import java.security.InvalidKeyException;
+import java.security.NoSuchAlgorithmException;
+
+
 public class Utils {
 	public enum HashType {
 		
@@ -94,6 +103,13 @@ public class Utils {
     	
     	return Base64.getEncoder().encodeToString( key.getEncoded());
     }
+    
+    public static Key stringToKey( String str) {
+    	
+    	byte[] decodedKey = Base64.getDecoder().decode(str);
+    	Key key = new SecretKeySpec(decodedKey, 0, decodedKey.length, "AES");
+    	return key;
+    }  
     
     public static String getKey( String keyStoreFileName, String keyStorePassword, String alias, String password) {
     	
@@ -185,5 +201,42 @@ public class Utils {
     		return true;
     	
     	return false;
+    }
+    
+    public static String GenerateMAC(String message, String key_str){
+
+		try {
+			 
+			// get a key generator for the HMAC-SHA256 keyed-hashing algorithm
+			KeyGenerator keyGen = KeyGenerator.getInstance("HmacSHA256");
+			 
+			Key key = stringToKey(key_str);
+   
+			// create a MAC and initialize with the above key
+			Mac mac = Mac.getInstance(key.getAlgorithm());
+			mac.init(key);
+		 
+			// get the string as UTF-8 bytes
+			byte[] b = message.getBytes("UTF-8");
+			 
+			// create a digest from the byte array
+			byte[] digest = mac.doFinal(b);
+			
+			return String.valueOf(digest);
+	 
+		}
+		catch (NoSuchAlgorithmException e) {
+			System.out.println("No Such Algorithm:" + e.getMessage());
+			return null;
+		}
+		catch (UnsupportedEncodingException e) {
+			System.out.println("Unsupported Encoding:" + e.getMessage());
+			return null;
+		}
+		catch (InvalidKeyException e) {
+			System.out.println("Invalid Key:" + e.getMessage());
+			return null;
+		}
+
     }
 }
