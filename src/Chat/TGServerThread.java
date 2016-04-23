@@ -16,6 +16,7 @@ import javax.swing.JTextArea;
 //  Crypto
 import java.security.*;
 import java.security.spec.*;
+import java.util.HashMap;
 import java.security.interfaces.*;
 import javax.crypto.*;
 import javax.crypto.spec.*;
@@ -39,12 +40,20 @@ public class TGServerThread extends Thread {
     private static final String kkdcAlias = "kdc";
     private static final String kkdcPassword = "passwordKDC";
     
+    private HashMap<String,String> passTable;
+    
 
     public TGServerThread(TGServer tgs) {
 
         super("AuthServerThread");
+        
+        passTable = new HashMap<String, String>();
+        passTable.put( kaAlias, kaPassword);
+        passTable.put( kbAlias, kbPassword);
         _tgs = tgs;
         _portNum = tgs.getPortNumber();
+        tgsKeyStoreFileName = _tgs.getKeyStoreFileName();
+        tgsKeyStorePassword = _tgs.getKeyStorePassword();
         _outputArea = tgs.getOutputArea();
         _serverSocket = null;
 
@@ -63,6 +72,7 @@ public class TGServerThread extends Thread {
         try {
             _serverSocket = new ServerSocket(_portNum);
             _outputArea.append("AS waiting on " + _hostName + " port " + _portNum);
+            
             while (true) {
                 Socket socket = _serverSocket.accept();
                 //
@@ -74,7 +84,6 @@ public class TGServerThread extends Thread {
                         socket.getInputStream()));
                 
                 String kKDC = Utils.getKey(tgsKeyStoreFileName, tgsKeyStorePassword, kkdcAlias, kkdcPassword);
-                String kB = Utils.getKey(tgsKeyStoreFileName, tgsKeyStorePassword, kbAlias, kbPassword);
                 
             	Key abKey;
             	SecureRandom rand = new SecureRandom();
@@ -89,17 +98,20 @@ public class TGServerThread extends Thread {
                 String idB = input[1];
                 String TGT = input[2];
                 
+                _outputArea.append( "\n" + idA_tocheck + " " + idB + " " + TGT);
+                
                 String [] TGT_in = Utils.decrypt_aes(kKDC, Constants.IV, TGT).split(" ");
                 String sA = TGT_in[0];
                 String idA = TGT_in[1];
                 
                 String timestamp = Utils.decrypt_aes(sA, Constants.IV, input[3]);
+                String kB = Utils.getKey(tgsKeyStoreFileName, tgsKeyStorePassword, idB, passTable.get( idB));
 
-                if(idA_tocheck == idA){
+                if(idA_tocheck.equals( idA) && Utils.checkTimestamp(timestamp)){
                 	asOut.println( Utils.encrypt_aes(sA, Constants.IV, idB+" "+kAB+" "+Utils.encrypt_aes(kB, Constants.IV, idA+" "+kAB)));
                 }
                 else{
-                	System.out.println("Your ID is wrong!");
+                	System.out.println("Your ID is wrong or timestamp is wrong!");
                 	socket.close();
                 }
                 

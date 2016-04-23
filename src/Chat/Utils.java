@@ -11,11 +11,17 @@ import java.security.KeyStoreException;
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
 import java.util.Base64;
+import java.util.Date;
 import java.util.Scanner;
+import java.util.concurrent.TimeUnit;
+
 import javax.xml.bind.DatatypeConverter;
 import java.security.Security;
 import java.security.UnrecoverableKeyException;
 import java.security.cert.CertificateException;
+import java.text.DateFormat;
+import java.text.ParseException;
+import java.text.SimpleDateFormat;
 
 import javax.crypto.Cipher;
 import javax.crypto.spec.SecretKeySpec;
@@ -149,5 +155,35 @@ public class Utils {
 		}
     	
     	return null;
+    }
+    
+    public static String getCurrentTimestamp() {
+    	
+    	SimpleDateFormat dateFormat = new SimpleDateFormat("dd-MM-yyyy HH:mm:ss");
+    	String time  = dateFormat.format(new Date());
+    	
+    	return time;
+    }
+    
+    public static boolean checkTimestamp( String timestamp) {
+    	
+    	SimpleDateFormat dateFormat = new SimpleDateFormat("dd-MM-yyyy HH:mm:ss");
+    	Date time = null;
+		try {
+			time = dateFormat.parse( timestamp);
+		} catch (ParseException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+    	Date current = new Date();
+    	
+    	long diffInMillies = current.getTime() - time.getTime();
+    	TimeUnit timeUnit = TimeUnit.MINUTES;
+        long diff = timeUnit.convert(diffInMillies,TimeUnit.MILLISECONDS);
+    	
+    	if( diff < 60)
+    		return true;
+    	
+    	return false;
     }
 }

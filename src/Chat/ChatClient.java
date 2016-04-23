@@ -29,6 +29,7 @@ import java.net.*;
 import java.security.*;
 import java.security.cert.*;
 import java.security.spec.*;
+import java.util.HashMap;
 import java.security.interfaces.*;
 import javax.crypto.*;
 import javax.crypto.spec.*;
@@ -63,9 +64,16 @@ public class ChatClient extends Thread {
     //  ChatClient Constructor
     //
     //  empty, as you can see.
+    private HashMap<Integer, String> clientTable;
+	
     public ChatClient() {
 
     	super("ChatClientListenThread");
+    	
+    	clientTable = new HashMap<Integer, String>();
+    	clientTable.put( 5001, "clienta");
+    	clientTable.put( 5002, "clientb");
+    	
         _loginName = null;
         _server = null;
 
@@ -89,6 +97,7 @@ public class ChatClient extends Thread {
     public void run() {
     	
     	System.out.println( "Listening started");
+ 
     	
     	/*String key = Utils.getKey( "as.jceks", "passwordAS", "clientb", "passwordB");
     	String key2 = Utils.getKey( "storeB.jceks", "passwordB", "clientb", "passwordB");
@@ -215,9 +224,28 @@ public class ChatClient extends Thread {
             String msg = asIn.readLine();
             msg = msg.trim();
             String session = msg.split(" ")[0];
+            String sA = Utils.decrypt_aes( kA, Constants.IV, session);
             String tgt = msg.split( " ")[1];
+            asSocket.close();
+            //TGS
+            Socket tgsSocket = new Socket( Constants.HOST, tgsPort);
+            PrintWriter tgsOut = new PrintWriter(tgsSocket.getOutputStream(), true);
+
+            BufferedReader tgsIn = new BufferedReader(new InputStreamReader(
+                    tgsSocket.getInputStream()));
             
-            System.out.println( session + "," + tgt);
+            String idA = loginName;
+            String idB = clientTable.get( portToConnect);
+            String timestamp = Utils.encrypt_aes( sA, Constants.IV, Utils.getCurrentTimestamp());
+            tgsOut.println( idA + " " + idB + " " + tgt + " " + timestamp);
+            
+            msg = tgsIn.readLine().trim();
+            String[] msgInput = Utils.decrypt_aes(sA, Constants.IV, msg).split( " ");
+            
+            String kAB = msgInput[1];
+            String ticket = msgInput[2];
+            
+            tgsSocket.close();
 
             _layout.show(_appFrame.getContentPane(), "ChatRoom");
             _thread = new ChatClientThread(this);

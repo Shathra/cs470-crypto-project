@@ -43,13 +43,16 @@ public class TGServerLoginPanel extends JPanel {
 
 
         _keystoreFileNameField = new JTextField();
+        _keystoreFileNameField.setText( "tgs.jceks");
         addField(gridBag, _keystoreFileNameField, 2, 1, 1, 1);
 
         _privateKeyPassField = new JPasswordField();
+        _privateKeyPassField.setText( "passwordTGS");
         _privateKeyPassField.setEchoChar('*');
         addField(gridBag, _privateKeyPassField, 2, 2, 1, 1);
   
         _portField = new JTextField();
+        _portField.setText( "7778");
         addField(gridBag, _portField, 2, 5, 1, 1);
 
         _errorLabel = addLabel(gridBag, " ", SwingConstants.CENTER, 1, 6, 2, 1);

@@ -43,6 +43,8 @@ public class TGServer {
     TGServerThread _thread;
     //  Port number to listen on
     private int _portNum;
+	private String keyStoreFileName;
+	private String keyStorePassword;
 
     //  Data structures to hold the authentication??
     //  information read from the file
@@ -114,7 +116,8 @@ public class TGServer {
     //
     public int startup(String _ksFileName, char[] _privateKeyPass, int _tgsPort) {
         _portNum = _tgsPort;
-
+        this.keyStoreFileName = _ksFileName;
+        this.keyStorePassword = String.valueOf( _privateKeyPass);
         //
         //  Read the TGS keystore (i.e. its private key)
         //  Failure codes to return are defined on the top
@@ -152,4 +155,14 @@ public class TGServer {
         TGServer tgs = new TGServer();
         tgs.run();
     }
+
+	public String getKeyStoreFileName() {
+		
+		return this.keyStoreFileName;
+	}
+
+	public String getKeyStorePassword() {
+		
+		return this.keyStorePassword;
+	}
 }
