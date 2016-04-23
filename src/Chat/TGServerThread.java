@@ -32,8 +32,8 @@ public class TGServerThread extends Thread {
     private String tgsKeyStoreFileName;
     private String tgsKeyStorePassword;
     
-    private static final String kaAlias = "clientA";
-    private static final String kbAlias = "clientB";
+    private static final String kaAlias = "clienta";
+    private static final String kbAlias = "clientb";
     private static final String kaPassword = "passwordA";
     private static final String kbPassword = "passwordB";
     private static final String kkdcAlias = "kdc";
@@ -84,7 +84,7 @@ public class TGServerThread extends Thread {
             	abKey = generator.generateKey();
             	String kAB = Utils.keyToString( abKey);
                 
-                String [] input = asIn.readLine().split(" ");
+                String [] input = asIn.readLine().trim().split(" ");
                 String idA_tocheck = input[0];
                 String idB = input[1];
                 String TGT = input[2];
@@ -106,7 +106,7 @@ public class TGServerThread extends Thread {
                 
             }
         } catch (Exception e) {
-            System.out.println("AS thread error: " + e.getMessage());
+            System.out.println("TGS thread error: " + e.getMessage());
             e.printStackTrace();
         }
 
