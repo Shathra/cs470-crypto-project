@@ -12,6 +12,7 @@ import java.awt.*;
 import java.awt.event.*;
 import javax.swing.*;
 
+@SuppressWarnings("serial")
 public class TGServerActivityPanel extends JPanel {
 
     JTextArea _outputArea;

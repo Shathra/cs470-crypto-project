@@ -9,6 +9,7 @@ import java.awt.*;
 import java.awt.event.*;
 import javax.swing.*;
 
+@SuppressWarnings("serial")
 public class TGServerLoginPanel extends JPanel {
 
     JPasswordField _privateKeyPassField;
@@ -32,7 +33,6 @@ public class TGServerLoginPanel extends JPanel {
     void componentInit() throws Exception {
         GridBagLayout gridBag = new GridBagLayout();
         GridBagConstraints c = new GridBagConstraints();
-        JLabel label;
 
         setLayout(gridBag);
 
@@ -107,7 +107,6 @@ public class TGServerLoginPanel extends JPanel {
     }
 
     private void startup() {
-        //System.out.println("Called startup");
 
         int _tgsPort;
 
@@ -139,7 +138,6 @@ public class TGServerLoginPanel extends JPanel {
             return;
         }
 
-        //System.out.println("TGentication server is starting up ...");
 
         switch (_tgs.startup(_keystoreFileName, _privateKeyPass, _tgsPort)) {
             case TGServer.SUCCESS:
@@ -154,6 +152,6 @@ public class TGServerLoginPanel extends JPanel {
                 break;
         }
 
-        //System.out.println("Ticket Granting Server startup complete");
+
     }
 }
