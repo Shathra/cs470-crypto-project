@@ -9,5 +9,4 @@ public class Constants {
 	public static final String HOST = "127.0.0.1";
 	
 	public static final String IV = "RandomInitVector";
-	public static final String USERNAME = "superman";
 }

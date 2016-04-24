@@ -10,30 +10,11 @@ import java.awt.*;
 import java.awt.event.*;
 import javax.swing.*;
 
-//  Java
-import java.io.*;
-import java.math.BigInteger;
-
-// socket
-import java.net.*;
-import java.io.*;
-import java.net.*;
-
-//  Crypto
-import java.security.*;
-import java.security.spec.*;
-import java.security.interfaces.*;
-import javax.crypto.*;
-import javax.crypto.spec.*;
-import javax.crypto.interfaces.*;
-
 public class TGServer {
     
     //  Failure codes
     public static final int SUCCESS = 0;
     public static final int KEYSTORE_FILE_NOT_FOUND = 1;
-//    public static final int PERMISSIONS_FILE_NOT_FOUND = 2;
-//    public static final int PERMISSIONS_FILE_TAMPERED = 3;
     public static final int ERROR = 4;
     //  The GUI
     TGServerLoginPanel _panel;

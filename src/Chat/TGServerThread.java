@@ -15,12 +15,8 @@ import javax.swing.JTextArea;
 
 //  Crypto
 import java.security.*;
-import java.security.spec.*;
 import java.util.HashMap;
-import java.security.interfaces.*;
 import javax.crypto.*;
-import javax.crypto.spec.*;
-import javax.crypto.interfaces.*;
 
 public class TGServerThread extends Thread {
 
@@ -85,7 +81,8 @@ public class TGServerThread extends Thread {
                 
                 String kKDC = Utils.getKey(tgsKeyStoreFileName, tgsKeyStorePassword, kkdcAlias, kkdcPassword);
                 
-            	Key abKey;
+                //generate a symmetric key  between client a and client b
+            	Key abKey; //the symmetric key
             	SecureRandom rand = new SecureRandom();
             	KeyGenerator generator = KeyGenerator.getInstance("AES");
             	generator.init(rand);
@@ -93,22 +90,25 @@ public class TGServerThread extends Thread {
             	abKey = generator.generateKey();
             	String kAB = Utils.keyToString( abKey);
                 
+            	//read input from the client a
                 String [] input = asIn.readLine().trim().split(" ");
-                String idA_tocheck = input[0];
-                String idB = input[1];
-                String TGT = input[2];
+                String idA_tocheck = input[0]; //id of client a (what client a claims)
+                String idB = input[1]; //id of client b
+                String TGT = input[2]; //ticket granting ticket
                 
-                _outputArea.append( "\n" + idA_tocheck + " " + idB + " " + TGT);
+                _outputArea.append( idA_tocheck+" sent a request to communacite with "+idB);
                 
                 String [] TGT_in = Utils.decrypt_aes(kKDC, Constants.IV, TGT).split(" ");
-                String sA = TGT_in[0];
-                String idA = TGT_in[1];
+                String sA = TGT_in[0]; //session key of client a
+                String idA = TGT_in[1]; //real id of client a (as authentication server says)
                 
                 String timestamp = Utils.decrypt_aes(sA, Constants.IV, input[3]);
-                String kB = Utils.getKey(tgsKeyStoreFileName, tgsKeyStorePassword, idB, passTable.get( idB));
+                String kB = Utils.getKey(tgsKeyStoreFileName, tgsKeyStorePassword, idB, passTable.get( idB)); //password of client b
 
+                //check if id of client a is and time-stamp are true
                 if(idA_tocheck.equals( idA) && Utils.checkTimestamp(timestamp)){
                 	asOut.println( Utils.encrypt_aes(sA, Constants.IV, idB+" "+kAB+" "+Utils.encrypt_aes(kB, Constants.IV, idA+" "+kAB)));
+                	_outputArea.append("Response has been sent to "+idA);
                 }
                 else{
                 	System.out.println("Your ID is wrong or timestamp is wrong!");
@@ -120,6 +120,7 @@ public class TGServerThread extends Thread {
         } catch (Exception e) {
             System.out.println("TGS thread error: " + e.getMessage());
             e.printStackTrace();
+            System.exit(-1);
         }
 
     }
